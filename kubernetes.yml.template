@@ -1,0 +1,57 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: hello-container-native
+  labels:
+    commit: ${WERCKER_GIT_COMMIT}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hello-container-native
+  template:
+    metadata:
+      labels:
+        app: hello-container-native
+        commit: ${WERCKER_GIT_COMMIT}
+    spec:
+      containers:
+      - name: hello-container-native
+        image: ${DOCKER_REPO}:${WERCKER_GIT_BRANCH}-${WERCKER_GIT_COMMIT}
+        imagePullPolicy: Always
+        ports:
+        - name: hello-container-native
+          containerPort: 8080
+          protocol: TCP
+      imagePullSecrets:
+        - name: wercker          
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello-container-native
+  labels:
+    app: hello-container-native
+    commit: ${WERCKER_GIT_COMMIT}
+spec:
+  ports:
+  - port: 8080
+    targetPort: 8080
+  selector:
+    app: hello-container-native
+    commit: ${WERCKER_GIT_COMMIT}
+  type: LoadBalancer
+---
+#apiVersion: extensions/v1beta1
+#kind: Ingress
+#metadata:
+ # name: hello-container-native-ingress
+#spec:
+ # rules:
+  #- host: hello-container-native.example.domain
+   # http:
+    #  paths:
+     # - path:
+      #  backend:
+       #   serviceName: hello-container-native
+        #  servicePort: 8080
